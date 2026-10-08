@@ -1,0 +1,10 @@
+{
+    "network": {
+        "interval": 15,
+        "format-wifi": "{essid} {signalStrength}%",
+        "format-ethernet": "eth {ipaddr}",
+        "format-linked": "{ifname} (no ip)",
+        "format-disconnected": "offline",
+        "tooltip": false
+    }
+}

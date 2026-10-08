@@ -1,0 +1,4 @@
+# Shared shell (bar, notifications, terminal server, idle) — same script as Hyprland uses.
+exec vim1s-shell
+# 1080p -> 720p -> preferred fallback for sway (Hyprland does this in hypr/conf/20-monitors.lua).
+exec vim1s-sway-modeset

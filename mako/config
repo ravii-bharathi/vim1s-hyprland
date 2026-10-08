@@ -1,0 +1,15 @@
+# vim1s-desktop :: mako 1.11 notifications (option names checked against mako 1.11.0 config.c)
+font=monospace 10
+background-color=#1d2021
+text-color=#ebdbb2
+border-color=#d79921
+border-size=1
+border-radius=0
+padding=6
+width=320
+icons=0
+max-visible=3
+max-history=5
+default-timeout=5000
+anchor=top-right
+layer=overlay

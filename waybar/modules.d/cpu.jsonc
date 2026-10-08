@@ -1,0 +1,7 @@
+{
+    "cpu": {
+        "interval": 5,
+        "format": "cpu {usage}%",
+        "tooltip": false
+    }
+}

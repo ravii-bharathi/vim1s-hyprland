@@ -1,0 +1,6 @@
+# vim1s-desktop :: swaylock 1.8.4 (keys = long options without "--", checked against main.c)
+# Solid colour, no screenshot/blur: locking costs no GPU time.
+color=1d2021
+ignore-empty-password
+show-failed-attempts
+indicator-radius=60

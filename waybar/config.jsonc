@@ -1,0 +1,31 @@
+// vim1s-desktop :: waybar 0.15.0 — one bar for both sessions (Hyprland and sway).
+//
+// Modular: this file only decides LAYOUT. Each module's behaviour lives in modules.d/<name>.jsonc
+// and is pulled in by "include" (waybar merges them; a key defined here wins over an included one).
+// To add a module: create modules.d/<name>.jsonc, add it to "include", add its name to a modules-* list.
+//
+// Workspaces use "ext/workspaces" (ext-workspace-v1 protocol), NOT "hyprland/workspaces":
+//   - Hyprland 0.56 and sway 1.12 both implement ext-workspace-v1, so one module serves both;
+//   - waybar 0.15.0's hyprland module switches workspace by sending legacy "dispatch workspace N"
+//     over IPC, which a Lua-configured Hyprland evaluates as Lua and rejects.
+//
+// Include paths are relative: waybar finds them in ~/.config/waybar/ on the board, and in
+// $WAYBAR_CONFIG_DIR during nested tests (dev/nested.sh points it at the repo).
+{
+    "layer": "top",
+    "position": "top",
+    "height": 24,
+    "spacing": 6,
+
+    "modules-left":   ["ext/workspaces"],
+    "modules-center": ["clock"],
+    "modules-right":  ["network", "cpu", "memory"],
+
+    "include": [
+        "modules.d/workspaces.jsonc",
+        "modules.d/clock.jsonc",
+        "modules.d/network.jsonc",
+        "modules.d/cpu.jsonc",
+        "modules.d/memory.jsonc"
+    ]
+}

@@ -1,0 +1,14 @@
+# Flat look, matching hypr/conf/30-look.lua. sway has no animations or blur to turn off.
+font pango:monospace 10
+default_border          pixel 1
+default_floating_border pixel 1
+gaps inner 2
+gaps outer 2
+
+#                       border  background text    indicator child_border
+client.focused          #d79921 #d79921    #1d2021 #d79921   #d79921
+client.unfocused        #3c3836 #1d2021    #a89984 #3c3836   #3c3836
+client.focused_inactive #3c3836 #1d2021    #a89984 #3c3836   #3c3836
+
+# Never start XWayland (saves RAM; matches Hyprland's xwayland.enabled = false).
+xwayland disable

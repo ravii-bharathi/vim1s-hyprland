@@ -1,0 +1,4 @@
+# Display policy (same as Hyprland): ask for 1080p60. If the monitor does not offer it,
+# bin/vim1s-sway-modeset (started in 90-autostart) switches that output to 720p60 or its preferred mode.
+output * mode 1920x1080@60Hz
+output * bg #1d2021 solid_color

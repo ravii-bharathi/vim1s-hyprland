@@ -1,0 +1,4 @@
+# local artefacts
+*.bundle
+*.log
+.vim1s-deployed

@@ -1,0 +1,13 @@
+# vim1s-desktop :: sway fallback session (sway 1.12, wlroots 0.20)
+#
+# Same shell, same keybinds as the Hyprland session; pick either one in tuigreet (F3).
+# sway resolves `include` paths relative to this file, so `sway -c <repo>/sway/config`
+# works straight from the git checkout (dev/nested.sh uses that).
+# Check syntax without starting:  sway -C -c sway/config
+
+set $mod  Mod4
+set $term footclient
+set $menu fuzzel
+set $lock swaylock -f
+
+include config.d/*

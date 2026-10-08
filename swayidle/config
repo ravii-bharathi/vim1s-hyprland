@@ -1,0 +1,6 @@
+# vim1s-desktop :: swayidle 1.9.0 — read from ~/.config/swayidle/config when started without args.
+# Works under both Hyprland and sway (ext-idle-notify-v1). vim1s-dpms hides the compositor difference.
+timeout 300 'swaylock -f'
+timeout 600 'vim1s-dpms off' resume 'vim1s-dpms on'
+before-sleep 'swaylock -f'
+lock 'swaylock -f'

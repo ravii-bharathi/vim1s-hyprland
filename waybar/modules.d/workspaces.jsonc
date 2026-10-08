@@ -1,0 +1,7 @@
+{
+    "ext/workspaces": {
+        "format": "{name}",
+        "on-click": "activate",
+        "ignore-hidden": true
+    }
+}
