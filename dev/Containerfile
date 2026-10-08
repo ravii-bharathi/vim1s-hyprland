@@ -1,0 +1,33 @@
+# vim1s-desktop :: laptop test environment (x86_64 Arch Linux, pinned snapshot)
+#
+# Why Arch and not Ubuntu's packages: Ubuntu 26.04 ships Hyprland 0.53.3 (pre-Lua config).
+# Arch x86_64 and Arch Linux ARM build the SAME PKGBUILDs, so pinning the Arch Linux Archive
+# to one date gives the exact versions the board installs (hyprland 0.56.2-4 on 2026-10-08).
+#
+# Build:   podman build -t vim1s-dev -f dev/Containerfile dev/
+# Bump:    podman build --build-arg ARCHIVE_DATE=2026/11/01 ...   (then re-run make validate)
+#
+# Used through distrobox (make box), which shares $HOME, the Wayland socket and /dev/dri
+# with the container, so Hyprland/sway can run nested in your GNOME session.
+
+FROM docker.io/library/archlinux:base
+
+ARG ARCHIVE_DATE=2026/10/08
+
+# Point pacman at the dated snapshot; -Syyuu also DOWNgrades anything newer in the base image.
+RUN echo "Server = https://archive.archlinux.org/repos/${ARCHIVE_DATE}/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist \
+ && pacman -Syyuu --noconfirm \
+ && pacman -S --noconfirm --needed \
+        hyprland sway swaybg \
+        foot fuzzel mako waybar swayidle swaylock \
+        greetd greetd-tuigreet \
+        mesa mesa-utils ttf-dejavu \
+        lua jq python shellcheck \
+        bash-completion \
+ && pacman -Scc --noconfirm
+
+# Record the pinned versions in the image for `make validate` to compare with ALARM.
+RUN pacman -Q hyprland sway waybar foot fuzzel mako swayidle swaylock greetd greetd-tuigreet mesa > /etc/vim1s-dev-versions.txt
+
+LABEL org.opencontainers.image.title="vim1s-dev" \
+      org.opencontainers.image.description="Nested Hyprland/sway test env matching the VIM1S Arch Linux ARM package set"
