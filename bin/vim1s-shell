@@ -1,0 +1,60 @@
+#!/bin/sh
+# vim1s-shell — start the shared desktop shell inside ANY Wayland compositor.
+# Called once from hypr/conf/90-autostart.lua and sway/config.d/90-autostart.
+#
+# Components (each optional — a missing binary is logged and skipped, never fatal):
+#   foot --server   terminal server (windows: footclient)
+#   mako            notifications
+#   waybar          bar
+#   swayidle        idle -> lock -> screen off (reads ~/.config/swayidle/config)
+#
+# Dev override: VIM1S_REPO=<checkout> makes waybar/mako/foot use configs from the repo
+# instead of ~/.config (dev/nested.sh sets it), so nothing needs installing to test.
+set -u
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/vim1s"
+mkdir -p "$state_dir"
+log="$state_dir/shell.log"
+: >"$log"
+
+say() { echo "$(date '+%H:%M:%S') vim1s-shell: $*" >>"$log"; }
+
+# Make the session's Wayland env visible to D-Bus/systemd-activated services (portals, notifications).
+if command -v dbus-update-activation-environment >/dev/null 2>&1; then
+    dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE >>"$log" 2>&1 \
+        || say "dbus-update-activation-environment failed (non-fatal)"
+fi
+
+# start <name> <command...> : launch in background unless missing or already running for this user.
+start() {
+    name=$1
+    shift
+    if ! command -v "$1" >/dev/null 2>&1; then
+        say "skip $name: '$1' not installed"
+        return 0
+    fi
+    if pgrep -u "$(id -u)" -x "$name" >/dev/null 2>&1; then
+        say "skip $name: already running"
+        return 0
+    fi
+    say "start $name: $*"
+    "$@" >>"$state_dir/$name.log" 2>&1 &
+}
+
+repo=${VIM1S_REPO:-}
+if [ -n "$repo" ]; then
+    say "dev mode: configs from $repo"
+    start foot     foot --server --config="$repo/foot/foot.ini"
+    start mako     mako --config "$repo/mako/config"
+    # waybar resolves the relative "include" paths in config.jsonc against this directory.
+    export WAYBAR_CONFIG_DIR="$repo/waybar"
+    start waybar   waybar --config "$repo/waybar/config.jsonc" --style "$repo/waybar/style.css"
+    # No swayidle in dev mode: it would lock/blank the HOST session's nested window.
+else
+    start foot     foot --server
+    start mako     mako
+    start waybar   waybar
+    start swayidle swayidle -w
+fi
+
+say "done"

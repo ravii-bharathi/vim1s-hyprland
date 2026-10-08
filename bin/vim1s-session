@@ -1,0 +1,46 @@
+#!/bin/sh
+# vim1s-session — session wrapper for greetd/tuigreet (`tuigreet --session-wrapper vim1s-session`).
+#
+# tuigreet runs:  vim1s-session <Exec= line of the chosen .desktop file>
+#   Hyprland ->  vim1s-session /usr/bin/start-hyprland
+#   sway     ->  vim1s-session sway
+# tuigreet already exports XDG_SESSION_TYPE, XDG_SESSION_DESKTOP and XDG_CURRENT_DESKTOP.
+#
+# What this adds:
+#   1. A PERSISTENT log per session in ~/.local/state/vim1s/ (survives a reboot, unlike
+#      $XDG_RUNTIME_DIR/hypr/*/hyprland.log). Read it from the serial console after a failure.
+#   2. Optional per-user overrides from ~/.config/vim1s/session.env (Mesa / aquamarine debug
+#      knobs) without editing any compositor config. See session/session.env.example.
+set -u
+
+if [ "$#" -eq 0 ]; then
+    echo "usage: vim1s-session <compositor command> [args...]" >&2
+    exit 2
+fi
+
+state_dir="${XDG_STATE_HOME:-$HOME/.local/state}/vim1s"
+mkdir -p "$state_dir"
+
+name=$(basename "$1")
+log="$state_dir/session-$name.log"
+[ -f "$log" ] && mv -f "$log" "$log.1"   # keep exactly one previous run
+
+env_file="${XDG_CONFIG_HOME:-$HOME/.config}/vim1s/session.env"
+if [ -r "$env_file" ]; then
+    set -a            # export every variable the file assigns
+    # shellcheck disable=SC1090  # user-provided file, path known only at runtime
+    . "$env_file"
+    set +a
+fi
+
+{
+    echo "== vim1s-session $(date '+%Y-%m-%dT%H:%M:%S%z') exec: $*"
+    echo "== kernel: $(uname -r)"
+    echo "== environment (graphics-relevant):"
+    env | grep -E '^(XDG_|WAYLAND|MESA|EGL_|GALLIUM|PAN_|AQ_|WLR_|HYPRLAND)' | sort
+    echo "== /dev/dri:"
+    ls -l /dev/dri 2>&1
+    echo "== compositor output follows"
+} >"$log" 2>&1
+
+exec "$@" >>"$log" 2>&1

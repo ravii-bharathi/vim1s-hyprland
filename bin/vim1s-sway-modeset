@@ -1,0 +1,28 @@
+#!/bin/sh
+# vim1s-sway-modeset — sway counterpart of hypr/conf/20-monitors.lua.
+#
+# Policy: 1920x1080@60 -> 1280x720@60 -> monitor's preferred mode.
+#   * sway/config.d/10-output requests 1920x1080@60Hz on every output.
+#   * If that mode is missing, sway 1.12 already falls back to the PREFERRED mode on its own
+#     (sway/config/output.c: "Configured mode ... not available, applying preferred mode").
+#   * So the only case to handle here: 1080p60 missing but 720p60 offered -> switch to 720p60.
+# Needs: swaymsg (ships with sway), jq.
+set -eu
+
+if [ "${VIM1S_NESTED:-0}" = "1" ]; then
+    # Nested: the "output" is a window on the host desktop; a fixed 720p keeps it small.
+    exec swaymsg 'output * mode 1280x720'
+fi
+
+command -v jq >/dev/null 2>&1 || {
+    echo "vim1s-sway-modeset: jq missing, leaving modes as configured" >&2
+    exit 0
+}
+
+# sway reports refresh in mHz; treat 59.94 as 60.
+swaymsg -r -t get_outputs | jq -r '
+  def has($m; $w; $h): any($m[]; .width == $w and .height == $h and (((.refresh / 1000) - 60) | fabs) < 1);
+  .[] | select((.modes // []) | (has(.; 1920; 1080) | not) and has(.; 1280; 720)) | .name
+' | while read -r out; do
+    swaymsg "output $out mode 1280x720@60Hz" >/dev/null
+done

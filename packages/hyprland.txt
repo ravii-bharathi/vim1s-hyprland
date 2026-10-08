@@ -1,0 +1,3 @@
+# Layer 1a: Hyprland compositor (profile "hyprland").
+# Pulls aquamarine, hyprlang, lua, glslang, xorg-xwayland (hard deps; xwayland is disabled at runtime).
+hyprland          # 0.56.2-4  extra — same pkgver-pkgrel as Arch x86_64 (used for laptop tests)

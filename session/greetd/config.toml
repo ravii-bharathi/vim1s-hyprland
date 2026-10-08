@@ -1,0 +1,20 @@
+# vim1s-desktop :: greetd 0.10 + tuigreet 0.9.1  (installed to /etc/greetd/config.toml by install.sh)
+#
+# tuigreet is a console (TUI) greeter: it needs no GPU, so the login screen still works when
+# Mesa/KMS is broken, which separates "login works" from "compositor fails".
+#
+#   --sessions        only OUR curated session list (Hyprland, Sway). The distro dir may also hold
+#                     hyprland-uwsm.desktop, which would fail here because uwsm is not installed.
+#   --session-wrapper every session runs as `vim1s-session <Exec>` -> persistent log in
+#                     ~/.local/state/vim1s/session-<name>.log
+#   --remember / --remember-user-session   pre-select last user and that user's last session
+#
+# Keys inside tuigreet: F2 command, F3 session menu, F12 power menu.
+# The serial console getty (ttyAML0) is untouched: you can always log in over UART.
+
+[terminal]
+vt = 1
+
+[default_session]
+command = "tuigreet --time --remember --remember-user-session --asterisks --sessions /usr/local/share/vim1s/wayland-sessions --session-wrapper /usr/local/bin/vim1s-session"
+user = "greeter"

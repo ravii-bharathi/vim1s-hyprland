@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=Sway (fallback)
+Comment=Lighter wlroots session with the same shell and keybinds
+Exec=/usr/bin/sway
+TryExec=/usr/bin/sway
+Type=Application
+DesktopNames=sway

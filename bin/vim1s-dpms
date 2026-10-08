@@ -1,0 +1,23 @@
+#!/bin/sh
+# vim1s-dpms on|off — turn all outputs on/off in whichever compositor is running.
+# Used by swayidle (swayidle/config) so the same idle config works for both sessions.
+#   Hyprland 0.56 (Lua config): `hyprctl dispatch` takes a Lua expression -> hl.dsp.dpms({ action = ... })
+#   sway:                       swaymsg output power on|off
+set -eu
+
+case "${1:-}" in
+    on | off) state=$1 ;;
+    *)
+        echo "usage: vim1s-dpms on|off" >&2
+        exit 2
+        ;;
+esac
+
+if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+    exec hyprctl dispatch "hl.dsp.dpms({ action = \"$state\" })"
+elif [ -n "${SWAYSOCK:-}" ]; then
+    exec swaymsg "output * power $state"
+else
+    echo "vim1s-dpms: no supported compositor detected (need HYPRLAND_INSTANCE_SIGNATURE or SWAYSOCK)" >&2
+    exit 1
+fi

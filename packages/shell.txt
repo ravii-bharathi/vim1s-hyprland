@@ -1,0 +1,7 @@
+# Layer 2: shared desktop shell — identical for the Hyprland and sway sessions.
+foot              # 1.27.0-1  extra — terminal (CPU renderer), run as `foot --server`
+fuzzel            # 1.15.0-1  extra — launcher
+mako              # 1.11.0-1  extra — notifications
+waybar            # 0.15.0-3  extra — bar (ext/workspaces module, works in both compositors)
+swayidle          # 1.9.0-1   extra — idle -> lock -> dpms
+swaylock          # 1.8.4-1   extra — locker (shm, no GPU)

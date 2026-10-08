@@ -1,0 +1,9 @@
+# Layer 0: login + graphics userspace. Always installed.
+# Format: one package per line; "#" starts a comment.
+# Versions seen on archlinuxarm.org (aarch64) on 2026-10-08 are noted for reference only;
+# scripts/validate.sh re-resolves every name against the live ALARM databases.
+greetd            # 0.10.3-2  extra — login daemon
+greetd-tuigreet   # 0.9.1-2   extra — console greeter (no GPU needed)
+mesa              # 1:26.2.2-1 extra — Panfrost (Gallium) + EGL/GBM
+jq                # listed on ALARM as optdep of mako; used by vim1s-sway-modeset
+ttf-dejavu        # unverified: package page check timed out — validate.sh decides

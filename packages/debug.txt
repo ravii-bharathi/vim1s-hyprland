@@ -1,0 +1,4 @@
+# Optional bring-up/debug tools (install.sh --with-debug). check-board.sh uses them if present.
+mesa-utils        # unverified on ALARM here — provides eglinfo (EGL/GLES caps on the render node)
+drm_info          # unverified on ALARM here — dumps KMS planes/formats/modifiers
+evtest            # unverified on ALARM here — raw evdev events once USB input exists
