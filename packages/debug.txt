@@ -1,4 +1,7 @@
-# Optional bring-up/debug tools (install.sh --with-debug). check-board.sh uses them if present.
-mesa-utils        # unverified on ALARM here — provides eglinfo (EGL/GLES caps on the render node)
-drm_info          # unverified on ALARM here — dumps KMS planes/formats/modifiers
-evtest            # unverified on ALARM here — raw evdev events once USB input exists
+# Optional bring-up/debug tools (install.sh --with-debug). check-board.sh uses eglinfo if present.
+# Names confirmed against the live ALARM aarch64 repos by validate.sh stage 8 (2026-10-09).
+mesa-utils        # provides eglinfo (EGL/GLES caps on the render node, works without a display)
+evtest            # raw evdev events once USB input exists
+#
+# Not packaged for ALARM aarch64: drm_info. For KMS planes/formats/modifiers use the kernel's own
+# debugfs dump instead (needs CONFIG_DEBUG_FS):  sudo cat /sys/kernel/debug/dri/*/state

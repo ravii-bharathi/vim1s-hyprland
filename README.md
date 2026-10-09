@@ -129,7 +129,8 @@ Some upstream sources were unreachable when this repo was authored (Codeberg, fr
 a few archlinuxarm.org pages). Everything below is therefore checked on **your** machines
 by `make validate`, not assumed:
 
-- `ttf-dejavu`, `mesa-utils`, `drm_info`, `evtest` package names on ALARM (marked `unverified` in `packages/`)
+- ~~package names on ALARM~~ — confirmed by stage 8 on 2026-10-09; `drm_info` is not packaged for
+  ALARM aarch64 and was dropped (use `/sys/kernel/debug/dri/*/state` instead)
 - `foot` / `fuzzel` configs use only long-stable keys and are checked by their own `--check-config`
 - Mesa / wlroots environment variables in `session.env.example` are listed but commented out
 

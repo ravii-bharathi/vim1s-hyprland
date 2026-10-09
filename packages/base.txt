@@ -6,4 +6,4 @@ greetd            # 0.10.3-2  extra — login daemon
 greetd-tuigreet   # 0.9.1-2   extra — console greeter (no GPU needed)
 mesa              # 1:26.2.2-1 extra — Panfrost (Gallium) + EGL/GBM
 jq                # listed on ALARM as optdep of mako; used by vim1s-sway-modeset
-ttf-dejavu        # unverified: package page check timed out — validate.sh decides
+ttf-dejavu        # confirmed in ALARM by validate.sh stage 8 (2026-10-09)
