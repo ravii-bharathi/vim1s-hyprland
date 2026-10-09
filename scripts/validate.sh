@@ -124,16 +124,30 @@ else
     echo 9 >"$tmp/local/ALPM_DB_VERSION"
     dl_ok=1
     for repo in core extra alarm aur; do
-        if ! curl -fsS --retry 2 -o "$tmp/sync/$repo.db" "$ALARM_MIRROR/aarch64/$repo/$repo.db"; then
+        db="$tmp/sync/$repo.db"
+        # -L: mirror.archlinuxarm.org answers with a GeoIP REDIRECT to a nearby mirror.
+        #     Without -L curl saves the redirect response itself as the "database".
+        if ! curl -fsSL --retry 2 -o "$db" "$ALARM_MIRROR/aarch64/$repo/$repo.db"; then
             dl_ok=0; fail_ "could not download $repo.db from $ALARM_MIRROR"
+        # A sync DB is a (compressed) tar archive; anything else is an HTML error page, a captive portal...
+        elif ! bsdtar -tf "$db" >/dev/null 2>&1; then
+            dl_ok=0; fail_ "$repo.db is not a valid package database ($(wc -c <"$db") bytes, starts: $(head -c 60 "$db" | tr -dc '[:print:]'))"
+        else
+            ok "$repo.db: $(bsdtar -tf "$db" | grep -c '/desc$') packages"
         fi
     done
     if [[ $dl_ok == 1 ]]; then
         pac=(pacman --config "$VIM1S_ROOT/dev/alarm-aarch64.conf" --dbpath "$tmp" --noconfirm)
         mapfile -t all_pkgs < <(read_pkgs packages/*.txt | sort -u)
-        unknown=()
-        for p in "${all_pkgs[@]}"; do "${pac[@]}" -Si "$p" >/dev/null 2>&1 || unknown+=("$p"); done
+        unknown=() first_err=''
+        for p in "${all_pkgs[@]}"; do
+            if ! err=$("${pac[@]}" -Si "$p" 2>&1 >/dev/null); then
+                unknown+=("$p")
+                [[ -z $first_err ]] && first_err=$err
+            fi
+        done
         if [[ ${#unknown[@]} -gt 0 ]]; then
+            [[ -n $first_err ]] && echo "    pacman said: ${first_err//$'\n'/ | }"
             fail_ "not found in ALARM aarch64: ${unknown[*]}"
         else
             pass_ "all ${#all_pkgs[@]} package names exist in ALARM aarch64"
