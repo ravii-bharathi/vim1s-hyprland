@@ -135,6 +135,7 @@ by `make validate`, not assumed:
 
 ## Updating the pinned versions
 
-1. Pick a newer date: `podman build --build-arg ARCHIVE_DATE=YYYY/MM/DD -t vim1s-dev -f dev/Containerfile dev/`
+1. Pick a newer date: `make image ARCHIVE_DATE=YYYY/MM/DD`, or `make image ARCHIVE_DATE=` to use live
+   mirrors when archive.archlinux.org is slow (one server in Europe). Stage 9 of `make validate` then reports drift.
 2. `distrobox rm vim1s-dev && make box && make validate`. Stage 9 tells you whether ALARM has caught up.
 3. Read the Hyprland release notes for Lua API changes. `hl_api_check.lua` flags removed or renamed options automatically.

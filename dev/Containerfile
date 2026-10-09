@@ -1,11 +1,23 @@
-# vim1s-desktop :: laptop test environment (x86_64 Arch Linux, pinned snapshot)
+# vim1s-desktop :: laptop test environment (x86_64 Arch Linux)
 #
 # Why Arch and not Ubuntu's packages: Ubuntu 26.04 ships Hyprland 0.53.3 (pre-Lua config).
-# Arch x86_64 and Arch Linux ARM build the SAME PKGBUILDs, so pinning the Arch Linux Archive
-# to one date gives the exact versions the board installs (hyprland 0.56.2-4 on 2026-10-08).
+# Arch x86_64 and Arch Linux ARM build the SAME PKGBUILDs, so the versions here match the board.
 #
-# Build:   podman build -t vim1s-dev -f dev/Containerfile dev/
-# Bump:    podman build --build-arg ARCHIVE_DATE=2026/11/01 ...   (then re-run make validate)
+# Two package sources (choose with ARCHIVE_DATE):
+#   ARCHIVE_DATE=YYYY/MM/DD  pinned snapshot from the Arch Linux Archive: reproducible, but it is ONE
+#                            server in Europe and can be very slow from Asia (default below).
+#   ARCHIVE_DATE=""          live Arch mirrors via LIVE_MIRROR (Arch's own GeoIP CDN): fast, but
+#                            "whatever is current today". scripts/validate.sh stage 9 then reports
+#                            any version drift against the board's ALARM repos.
+#
+# Build:   make image                      (pinned snapshot)
+#          make image ARCHIVE_DATE=        (live mirrors)
+#
+# Robustness on slow links:
+#   * DisableDownloadTimeout  pacman normally aborts a file after 10 s below 1 byte/s
+#   * ParallelDownloads = 2   fewer simultaneous connections to a single slow server
+#   * cache mount             downloaded packages survive a failed build; a retry resumes
+#                             instead of re-downloading everything (needs podman >= 4)
 #
 # Used through distrobox (make box), which shares $HOME, the Wayland socket and /dev/dri
 # with the container, so Hyprland/sway can run nested in your GNOME session.
@@ -13,20 +25,32 @@
 FROM docker.io/library/archlinux:base
 
 ARG ARCHIVE_DATE=2026/10/08
+ARG LIVE_MIRROR=https://geo.mirror.pkgbuild.com
 
-# Point pacman at the dated snapshot; -Syyuu also DOWNgrades anything newer in the base image.
-RUN echo "Server = https://archive.archlinux.org/repos/${ARCHIVE_DATE}/\$repo/os/\$arch" > /etc/pacman.d/mirrorlist \
- && pacman -Syyuu --noconfirm \
- && pacman -S --noconfirm --needed \
+RUN if [ -n "$ARCHIVE_DATE" ]; then \
+        echo "Server = https://archive.archlinux.org/repos/${ARCHIVE_DATE}/\$repo/os/\$arch"; \
+    else \
+        echo "Server = ${LIVE_MIRROR}/\$repo/os/\$arch"; \
+    fi > /etc/pacman.d/mirrorlist \
+ && sed -i -e 's/^#\?ParallelDownloads.*/ParallelDownloads = 2/' \
+           -e '/^\[options\]/a DisableDownloadTimeout' /etc/pacman.conf \
+ && cat /etc/pacman.d/mirrorlist
+
+# Layer 1: sync to the chosen snapshot (-yy forces fresh DBs, -uu also DOWNgrades newer base-image packages).
+RUN --mount=type=cache,target=/var/cache/pacman/pkg \
+    pacman -Syyuu --noconfirm
+
+# Layer 2: the desktop stack + tools. Separate layer, so a failure here keeps layer 1 cached.
+RUN --mount=type=cache,target=/var/cache/pacman/pkg \
+    pacman -S --noconfirm --needed \
         hyprland sway swaybg \
         foot fuzzel mako waybar swayidle swaylock \
         greetd greetd-tuigreet \
         mesa mesa-utils ttf-dejavu \
         lua jq python shellcheck \
-        bash-completion \
- && pacman -Scc --noconfirm
+        bash-completion
 
-# Record the pinned versions in the image for `make validate` to compare with ALARM.
+# Record the versions in the image for `make validate` (stage 9) to compare with ALARM.
 RUN pacman -Q hyprland sway waybar foot fuzzel mako swayidle swaylock greetd greetd-tuigreet mesa > /etc/vim1s-dev-versions.txt
 
 LABEL org.opencontainers.image.title="vim1s-dev" \
